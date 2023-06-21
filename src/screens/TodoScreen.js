@@ -149,11 +149,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginVertical: 5,
-    width: '80%',
+    width: '90%',
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
+    shadowColor: '#000000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2,
   },
+
   todoText: {
     fontSize: 16,
     color: '#423a3a',
