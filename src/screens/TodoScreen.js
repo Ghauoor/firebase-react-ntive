@@ -13,8 +13,11 @@ const TodoScreen = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
+    const userId = auth().currentUser.uid;
+
     const unsubscribe = firestore()
       .collection('todos')
+      .where('userId', '==', userId)
       .onSnapshot(snapshot => {
         const todosData = snapshot.docs.map(doc => ({
           id: doc.id,
@@ -42,11 +45,13 @@ const TodoScreen = () => {
       return;
     }
 
+    const userId = auth().currentUser.uid; // Get the user ID of the current user
+
     if (editId) {
       firestore().collection('todos').doc(editId).update({text: text});
       setEditId(null);
     } else {
-      const newTodo = {text: text};
+      const newTodo = {text: text, userId: userId};
       firestore().collection('todos').add(newTodo);
     }
 
