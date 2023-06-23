@@ -7,44 +7,45 @@ import {
   StyleSheet,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import {useNavigation} from '@react-navigation/native';
 
 const SignupScreen = () => {
   const navigation = useNavigation();
-
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (name.trim() === '' || email.trim() === '' || password.trim() === '') {
       return;
     }
 
-    auth()
-      .createUserWithEmailAndPassword(email, password)
-      .then(userCredential => {
-        const user = userCredential.user;
-        console.log('Signup successful:', user);
-
-        setName('');
-        setEmail('');
-        setPassword('');
-
-        navigation.navigate('Login'); // Navigate to the login screen
-      })
-      .catch(error => {
-        // Signup failed
-        if (error.code === 'auth/email-already-in-use') {
-          console.log('That email address is already in use!');
-        }
-
-        if (error.code === 'auth/invalid-email') {
-          console.log('That email address is invalid!');
-        }
-        console.error('Error signing up:', error);
-      });
+    try {
+      const userCredential = await auth().createUserWithEmailAndPassword(
+        email,
+        password,
+      );
+      navigation.navigate('Login');
+      const user = userCredential.user;
+      console.log('Signup successful:', user);
+      // setName('');
+      // setEmail('');
+      // setPassword('');
+      const data = {id: user.uid, name: name, email: email};
+      await firestore().collection('users').doc(user.uid).set(data);
+      console.log('User data added to Firestore successfully!');
+    } catch (error) {
+      // Signup failed
+      if (error.code === 'auth/email-already-in-use') {
+        console.log('That email address is already in use!');
+      }
+      if (error.code === 'auth/invalid-email') {
+        console.log('That email address is invalid!');
+      }
+      console.error('Error signing up:', error);
+    }
   };
 
   const togglePasswordVisibility = () => {

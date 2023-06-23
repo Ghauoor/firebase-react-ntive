@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,21 @@ import auth from '@react-native-firebase/auth';
 const LoginScreen = () => {
   const navigation = useNavigation();
 
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged(user => {
+      if (user) {
+        if (navigation.isFocused()) {
+          navigation.navigate('TodoScreen');
+        }
+        console.log('User was already logged in');
+      } else {
+        navigation.navigate('Login');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigation]);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -23,15 +38,13 @@ const LoginScreen = () => {
     auth()
       .signInWithEmailAndPassword(email, password)
       .then(userCredential => {
+        navigation.navigate('TodoScreen');
         const user = userCredential.user;
-        // Login successful
         console.log('Login successful:', user);
-
-        setEmail('');
-        setPassword('');
+        // setEmail('');
+        // setPassword('');
       })
       .catch(error => {
-        // Login failed
         if (error.code === 'auth/invalid-email') {
           console.log('Invalid email address!');
         } else if (error.code === 'auth/user-disabled') {

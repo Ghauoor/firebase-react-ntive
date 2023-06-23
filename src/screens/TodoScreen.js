@@ -1,13 +1,16 @@
 import React, {useState, useEffect} from 'react';
 import {View, StyleSheet, Text, TextInput, ScrollView} from 'react-native';
 import CustomButton from '../components/CustomButton';
+import {useNavigation} from '@react-navigation/native';
 
 import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
 const TodoScreen = () => {
   const [text, setText] = useState('');
   const [todos, setTodos] = useState([]);
   const [editId, setEditId] = useState(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const unsubscribe = firestore()
@@ -22,6 +25,17 @@ const TodoScreen = () => {
 
     return () => unsubscribe();
   }, []);
+
+  //Handle Logout
+  const handleLogout = async () => {
+    try {
+      await auth().signOut();
+      console.log('User Logout Successfully');
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
 
   const handlePress = () => {
     if (text.trim() === '') {
@@ -50,7 +64,16 @@ const TodoScreen = () => {
 
   return (
     <View style={styles.mainContainer}>
-      <Text style={styles.mainText}>Todo App: </Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.mainText}>Todo App: </Text>
+        <CustomButton
+          onPress={handleLogout}
+          title="Logout"
+          buttonStyle={styles.logoutButton}
+          textStyle={styles.todoButtonText}
+        />
+      </View>
+
       <TextInput
         style={styles.textInputStyle}
         placeholder="Enter Your Todos here"
@@ -59,23 +82,27 @@ const TodoScreen = () => {
       />
       <ScrollView contentContainerStyle={styles.todoListContainer}>
         <Text style={styles.todoListText}>Todo List:</Text>
-        {todos.map(todo => (
-          <View key={todo.id} style={styles.todoCard}>
-            <Text style={styles.todoText}>{todo.text}</Text>
-            <CustomButton
-              onPress={() => handleDelete(todo.id)}
-              title="Delete"
-              buttonStyle={styles.deleteButton}
-              textStyle={styles.deleteButtonText}
-            />
-            <CustomButton
-              onPress={() => handleEdit(todo.id, todo.text)}
-              title="Edit"
-              buttonStyle={styles.editButton}
-              textStyle={styles.editButtonText}
-            />
-          </View>
-        ))}
+        {todos.length === 0 ? (
+          <Text style={styles.emptyListText}>No todos yet.</Text>
+        ) : (
+          todos.map(todo => (
+            <View key={todo.id} style={styles.todoCard}>
+              <Text style={styles.todoText}>{todo.text}</Text>
+              <CustomButton
+                onPress={() => handleDelete(todo.id)}
+                title="Delete"
+                buttonStyle={styles.deleteButton}
+                textStyle={styles.deleteButtonText}
+              />
+              <CustomButton
+                onPress={() => handleEdit(todo.id, todo.text)}
+                title="Edit"
+                buttonStyle={styles.editButton}
+                textStyle={styles.editButtonText}
+              />
+            </View>
+          ))
+        )}
       </ScrollView>
       <View style={styles.buttonPosition}>
         <View style={styles.buttonContainer}>
@@ -95,6 +122,12 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: '#cbc6c6',
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   todoButton: {
     backgroundColor: '#ff6f00',
@@ -117,7 +150,6 @@ const styles = StyleSheet.create({
   mainText: {
     fontSize: 35,
     padding: 7,
-    marginBottom: 20,
     color: '#423a3a',
   },
   textInputStyle: {
@@ -149,21 +181,26 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginVertical: 5,
-    width: '90%',
+    width: '80%',
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
-    shadowColor: '#000000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 2,
   },
-
   todoText: {
     fontSize: 16,
     color: '#423a3a',
     flex: 1,
+  },
+  emptyListText: {
+    fontSize: 16,
+    color: '#423a3a',
+    fontStyle: 'italic',
+    marginVertical: 10,
+  },
+  logoutButton: {
+    backgroundColor: 'red',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
