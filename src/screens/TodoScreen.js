@@ -45,8 +45,7 @@ const TodoScreen = () => {
       return;
     }
 
-    const userId = auth().currentUser.uid; // Get the user ID of the current user
-
+    const userId = auth().currentUser.uid;
     if (editId) {
       firestore().collection('todos').doc(editId).update({text: text});
       setEditId(null);

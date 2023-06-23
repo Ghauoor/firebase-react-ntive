@@ -41,8 +41,8 @@ const LoginScreen = () => {
         navigation.navigate('TodoScreen');
         const user = userCredential.user;
         console.log('Login successful:', user);
-        // setEmail('');
-        // setPassword('');
+        setEmail('');
+        setPassword('');
       })
       .catch(error => {
         if (error.code === 'auth/invalid-email') {

@@ -30,9 +30,9 @@ const SignupScreen = () => {
       navigation.navigate('Login');
       const user = userCredential.user;
       console.log('Signup successful:', user);
-      // setName('');
-      // setEmail('');
-      // setPassword('');
+      setName('');
+      setEmail('');
+      setPassword('');
       const data = {id: user.uid, name: name, email: email};
       await firestore().collection('users').doc(user.uid).set(data);
       console.log('User data added to Firestore successfully!');
